@@ -52,7 +52,7 @@
               @delete="confirmDelete"
             />
           </div>
-          
+
           <div v-if="loading" class="loading-state">
             <div class="loading-spinner">
               <div class="spinner"></div>
@@ -173,7 +173,8 @@ export default {
     async loadAgendas() {
       this.loading = true;
       try {
-        this.agendas = await getAgendasApi();
+        const response = await getAgendasApi();
+        this.agendas = Array.isArray(response) ? response : response.data || [];
       } catch (error) {
         this.showErrorModal(
           error.message || "Erro ao carregar contatos",
@@ -349,7 +350,7 @@ export default {
   .agenda-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .form-container {
     position: static;
     margin-top: 2rem;
@@ -593,15 +594,15 @@ export default {
   .agenda-container {
     padding: 1rem;
   }
-  
+
   .modal-content {
     width: 95%;
   }
-  
+
   .modal-footer {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
   }
