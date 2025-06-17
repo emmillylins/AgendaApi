@@ -1,5 +1,4 @@
 ﻿using Application.DTOs;
-using Application.Exceptions;
 using Application.Interfaces;
 using Domain.Validators;
 using Infrastructure.Notifications;

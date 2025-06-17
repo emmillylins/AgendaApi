@@ -77,9 +77,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]))
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 
     options.Events = new JwtBearerEvents
@@ -105,10 +106,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", builder =>
     {
-        builder.SetIsOriginAllowed(origin => true) // Permite qualquer origem
-                   .AllowAnyMethod()
-                   .AllowAnyHeader()
-                   .AllowCredentials();
+        builder.SetIsOriginAllowed(origin => true)
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .WithExposedHeaders("Authorization") // Adicione esta linha
+               .AllowCredentials();
     });
 });
 
@@ -179,6 +181,17 @@ app.UseCors("AllowAllOrigins");
 
 // Middleware de tratamento de erros
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Requisição para: {context.Request.Path}");
+    Console.WriteLine("Headers:");
+    foreach (var header in context.Request.Headers)
+    {
+        Console.WriteLine($"{header.Key}: {header.Value}");
+    }
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
